@@ -3,6 +3,7 @@ const {
   NOT_FOUND,
   SERVER_ERROR,
   BAD_REQUEST,
+  FORBIDDEN
 } = require("../utils/errors");
 
 const createItem = (req, res) => {
@@ -49,7 +50,7 @@ const deleteItem = (req, res) => {
     .then((item) => {
       if (item.owner.toString() !== req.user._id) {
         const error = new Error("Forbidden");
-        error.statusCode = 403;
+        error.statusCode = FORBIDDEN;
         throw error;
       }
       return ClothingItem.findByIdAndRemove(itemId);
@@ -67,8 +68,8 @@ const deleteItem = (req, res) => {
           .status(NOT_FOUND)
           .send({ message: "Requested resource not found" });
       }
-      if (e.statusCode === 403) {
-        return res.status(403).send({ message: "Forbidden" });
+      if (e.statusCode === FORBIDDEN) {
+        return res.status(FORBIDDEN).send({ message: "Forbidden" });
       }
       return res.status(SERVER_ERROR).send({ message: "An error has occurred on the server." });
     });
@@ -77,7 +78,7 @@ const deleteItem = (req, res) => {
 const likeItem = (req, res) => {
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
-    { $addToSet: { likes: req.user.userId } },
+    { $addToSet: { likes: req.user._id } },
     { new: true }
   )
     .orFail(() => {
