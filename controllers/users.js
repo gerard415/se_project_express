@@ -29,36 +29,28 @@ const createUser = (req, res) => {
       .send({ message: "Email and Password are required" });
   }
 
-  User.findOne({ email })
+  return User.findOne({ email })
     .then((existingUser) => {
       if (existingUser) {
         return res
           .status(CONFLICT)
           .send({ message: "Account with Email already exists" });
       }
-      return bcrypt.hash(password, 10).then((pass) => {
-        User.create({ name, avatar, email, password: pass })
-          .then((data) => {
-            res.send({
+      return bcrypt.hash(password, 10).then((pass) => User.create({ name, avatar, email, password: pass })
+          .then((data) => res.send({
               data: { name: data.name, avatar: data.avatar, email: data.email },
-            });
-          })
-          .catch((e) => {
-            console.log(e);
-            if (e.name === "ValidationError") {
-              return res
-                .status(BAD_REQUEST)
-                .send({ message: "Validation Error from createUser" });
-            }
-            return res
-              .status(SERVER_ERROR)
-              .send({ message: "Error from createUser" });
-          });
-      });
+            })));
     })
     .catch((e) => {
       console.log(e);
-      return res.status(SERVER_ERROR).send({ message: "Error from createUser" });
+      if (e.name === "ValidationError") {
+        return res
+          .status(BAD_REQUEST)
+          .send({ message: "Validation Error from createUser" });
+      }
+      return res
+        .status(SERVER_ERROR)
+        .send({ message: "Error from createUser" });
     });
 };
 
