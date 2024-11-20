@@ -56,7 +56,7 @@ const createUser = (req, res) => {
 
 const updateUser = (req, res) => {
   const { name, avatar } = req.body;
-  User.findByIdAndUpdate(req.user.userId, { name, avatar }, { new: true })
+  User.findByIdAndUpdate(req.user.userId, { name, avatar }, { new: true, runValidators: true })
     .then((data) => res.send(data))
     .catch((e) => {
       console.log(e.name);
