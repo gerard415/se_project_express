@@ -13,7 +13,7 @@ const createItem = (req, res) => {
     name,
     weather,
     imageUrl,
-    owner: req.user._id,
+    owner: req.user.userId,
   })
     .then((item) => res.send(item))
     .catch((e) => {
@@ -48,7 +48,7 @@ const deleteItem = (req, res) => {
       throw error;
     })
     .then((item) => {
-      if (item.owner.toString() !== req.user._id) {
+      if (item.owner.toString() !== req.user.userId) {
         const error = new Error("Forbidden");
         error.statusCode = FORBIDDEN;
         throw error;
@@ -61,24 +61,24 @@ const deleteItem = (req, res) => {
       if (e.name === "CastError") {
         return res
           .status(BAD_REQUEST)
-          .send({ message: "Bad Request" });
+          .send({ message: "Bad Request Error from deleteItem" });
       }
       if (e.statusCode === NOT_FOUND || e.name === "DocumentNotFoundError") {
         return res
           .status(NOT_FOUND)
-          .send({ message: "Requested resource not found" });
+          .send({ message: "NOT_FOUND Error from deleteItem" });
       }
       if (e.statusCode === FORBIDDEN) {
         return res.status(FORBIDDEN).send({ message: "Forbidden" });
       }
-      return res.status(SERVER_ERROR).send({ message: "An error has occurred on the server." });
+      return res.status(SERVER_ERROR).send({ message: "Error from deleteItem" });
     });
 };
 
 const likeItem = (req, res) => {
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
-    { $addToSet: { likes: req.user._id } },
+    { $addToSet: { likes: req.user.userId } },
     { new: true }
   )
     .orFail(() => {
@@ -109,7 +109,7 @@ const likeItem = (req, res) => {
 const dislikeItem = (req, res) => {
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
-    { $pull: { likes: req.user._id } },
+    { $pull: { likes: req.user.userId } },
     { new: true }
   )
     .orFail(() => {
