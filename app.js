@@ -1,11 +1,16 @@
+require('dotenv').config();
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const { errors } = require("celebrate");
 
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 const mainRouter = require("./routes/index");
 const auth = require("./middlewares/auth");
 const { login, createUser } = require("./controllers/users");
 const { getItems } = require("./controllers/clothingItems");
+const errorHandler = require("./middlewares/error-handler");
 
 const app = express();
 const { PORT = 3001 } = process.env;
@@ -20,12 +25,18 @@ mongoose
 app.use(express.json());
 app.use(cors())
 
+app.use(requestLogger);
+
 app.post("/signin", login);
 app.post("/signup", createUser);
 app.get("/items", getItems);
 
 app.use(auth)
 app.use("/", mainRouter);
+
+app.use(errorLogger);
+app.use(errors())
+app.use(errorHandler)
 
 app.listen(PORT, () => {
   console.log(`server is running on port ${PORT}`);
