@@ -15,3 +15,8 @@ The WTWR project helps user decide what to wear based on various weather conditi
 - MongoDB
 - Postman
 
+
+## Domains
+- www.cigwtwr.strangled.net
+- cigwtwr.strangled.net
+- api.cigwtwr.strangled.net
