@@ -10,9 +10,14 @@ const { UnauthorizedError } = require('../errors/unauthorizederror');
 
 const getCurrentUser = (req, res, next) => {
   User.findById(req.user.userId)
+    .orFail(() => {
+      next( new NotFoundError("Item not found"))
+    })
     .then((data) => res.send({ data }))
     .catch(() => {
-      next( new NotFoundError("User not found"))
+      if (err.name === "DocumentNotFoundError" || err.statusCode === NOT_FOUND) {
+        next( new NotFoundError('Item not found'));
+      }
     });
 };
 
@@ -26,7 +31,7 @@ const createUser = (req, res, next) => {
   return User.findOne({ email })
     .then((existingUser) => {
       if (existingUser) {
-        next( new ConflictError('Account with email already exists'));
+        return next( new ConflictError('Account with email already exists'));
       }
       return bcrypt.hash(password, 10).then((pass) => User.create({ name, avatar, email, password: pass })
           .then((data) => res.send({
@@ -44,6 +49,9 @@ const createUser = (req, res, next) => {
 const updateUser = (req, res, next) => {
   const { name, avatar } = req.body;
   User.findByIdAndUpdate(req.user.userId, { name, avatar }, { new: true, runValidators: true })
+    .orFail(() => {
+      next( new NotFoundError("Item not found"))
+    })
     .then((data) => res.send(data))
     .catch((err) => {
       if (err.name === "ValidationError") {

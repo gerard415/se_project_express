@@ -44,7 +44,7 @@ const deleteItem = (req, res, next) => {
     })
     .then((item) => {
       if (item.owner.toString() !== req.user.userId) {
-        next( new ForbiddenError("You don't have permission to access this resource"));
+        return next( new ForbiddenError("You don't have permission to access this resource"));
       }
       return ClothingItem.findByIdAndRemove(itemId);
     })
