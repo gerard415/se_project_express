@@ -6,6 +6,7 @@ const { NotFoundError } = require("../errors/notfounderror");
 const { BadRequestError } = require("../errors/badrequesterror");
 const { ConflictError } = require('../errors/conflicterror');
 const { UnauthorizedError } = require('../errors/unauthorizederror');
+const {NOT_FOUND} = require("../utils/errors");
 
 
 const getCurrentUser = (req, res, next) => {
@@ -14,10 +15,11 @@ const getCurrentUser = (req, res, next) => {
       next( new NotFoundError("Item not found"))
     })
     .then((data) => res.send({ data }))
-    .catch(() => {
+    .catch((err) => {
       if (err.name === "DocumentNotFoundError" || err.statusCode === NOT_FOUND) {
         next( new NotFoundError('Item not found'));
       }
+      next(err)
     });
 };
 
